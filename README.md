@@ -17,4 +17,5 @@ server (to fund contract transactions). For convenience, I run public instances
 of these services. My shard server address is http://shard.lukechampine.com, and
 you can get a personal `walrus` server by visiting https://narwal.lukechampine.com.
 
-API documentation can be found [here](https://lukechampine.com/docs/muse).
+To communicate with your `muse` server, you can use the [`musec`](cmd/musec/README.md) CLI client,
+or interface with the API directly. API documentation can be found [here](https://lukechampine.com/docs/muse).
