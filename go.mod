@@ -10,7 +10,6 @@ require (
 	lukechampine.com/flagg v1.1.1
 	lukechampine.com/frand v1.0.1
 	lukechampine.com/shard v0.3.0
-	lukechampine.com/us v0.14.0
+	lukechampine.com/us v0.14.1
 )
 
-replace lukechampine.com/us => ../us
