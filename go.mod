@@ -12,4 +12,3 @@ require (
 	lukechampine.com/shard v0.3.0
 	lukechampine.com/us v0.14.1
 )
-

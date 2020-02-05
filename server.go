@@ -331,7 +331,7 @@ func NewServer(dir string, wallet proto.Wallet, tpool proto.TransactionPool, sha
 	}
 
 	// load host sets
-	hostSetsJSON, err := ioutil.ReadFile("hostSets.json")
+	hostSetsJSON, err := ioutil.ReadFile(filepath.Join(dir, "hostSets.json"))
 	if os.IsNotExist(err) {
 		srv.hostSets = make(map[string][]hostdb.HostPublicKey)
 	} else {
