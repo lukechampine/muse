@@ -109,7 +109,7 @@ func (c *Client) Renew(id types.FileContractID, funds types.Currency, start, end
 
 // HostSets returns the current list of host sets.
 func (c *Client) HostSets() (hs []string, err error) {
-	err = c.get("/hostsets", &hs)
+	err = c.get("/hostsets/", &hs)
 	return
 }
 

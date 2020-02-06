@@ -1,11 +1,14 @@
-package main // import "lukechampine.com/user"
+package main
 
 import (
 	"context"
 	"log"
+	"os/user"
+	"path/filepath"
 	"runtime"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"gitlab.com/NebulousLabs/Sia/build"
 	"lukechampine.com/flagg"
 	"lukechampine.com/us/hostdb"
@@ -121,13 +124,26 @@ func scanHost(hkr renter.HostKeyResolver, pubkey hostdb.HostPublicKey) (hostdb.S
 	return hostdb.Scan(ctx, addr, pubkey)
 }
 
+func loadAddrFromConfig() string {
+	user, err := user.Current()
+	if err != nil {
+		return ""
+	}
+	var config struct {
+		MuseAddr string `toml:"muse_addr"`
+	}
+	toml.DecodeFile(filepath.Join(user.HomeDir, ".config", "user", "config.toml"), &config)
+	return config.MuseAddr
+}
+
 func main() {
 	log.SetFlags(0)
 
-	var museAddr string
+	// read server addr from user config file, if it exists
+	museAddr := loadAddrFromConfig()
 
 	rootCmd := flagg.Root
-	rootCmd.StringVar(&museAddr, "a", "localhost:9580", "host:port that the muse API is running on")
+	rootCmd.StringVar(&museAddr, "a", museAddr, "host:port that the muse API is running on")
 	rootCmd.Usage = flagg.SimpleUsage(rootCmd, rootUsage)
 
 	versionCmd := flagg.New("version", versionUsage)
