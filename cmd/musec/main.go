@@ -85,6 +85,8 @@ only the contracts formed with those hosts are listed.
 Actions:
 	create          create a host set
 	delete          delete a host set
+	add             add a host to a host set
+	remove          remove a host from a host set
 
 Lists host sets.
 `
@@ -98,6 +100,16 @@ specified as a comma-separated list of pubkeys.
 musec hosts delete [name]
 
 Deletes the host set with the given name.
+`
+	hostsAddUsage = `Usage:
+musec hosts add [name] [host]
+
+Adds a host to the host set with the given name.
+`
+	hostsRemoveUsage = `Usage:
+musec hosts remove [name] [host]
+
+Removes a host from the host set with the given name.
 `
 	infoUsage = `Usage:
     musec info contract
@@ -155,6 +167,8 @@ func main() {
 	hostsCmd := flagg.New("hosts", hostsUsage)
 	hostsCreateCmd := flagg.New("create", hostsCreateUsage)
 	hostsDeleteCmd := flagg.New("delete", hostsDeleteUsage)
+	hostsAddCmd := flagg.New("add", hostsAddUsage)
+	hostsRemoveCmd := flagg.New("remove", hostsRemoveUsage)
 	infoCmd := flagg.New("info", infoUsage)
 
 	cmd := flagg.Parse(flagg.Tree{
@@ -168,6 +182,8 @@ func main() {
 			{Cmd: contractsCmd},
 			{Cmd: hostsCmd, Sub: []flagg.Tree{
 				{Cmd: hostsCreateCmd},
+				{Cmd: hostsAddCmd},
+				{Cmd: hostsRemoveCmd},
 				{Cmd: hostsDeleteCmd},
 			}},
 			{Cmd: infoCmd},
@@ -183,7 +199,7 @@ func main() {
 		}
 		fallthrough
 	case versionCmd:
-		log.Printf("musec v0.1.0\nCommit:     %s\nRelease:    %s\nGo version: %s %s/%s\nBuild Date: %s\n",
+		log.Printf("musec v0.4.0\nCommit:     %s\nRelease:    %s\nGo version: %s %s/%s\nBuild Date: %s\n",
 			githash, build.Release, runtime.Version(), runtime.GOOS, runtime.GOARCH, builddate)
 
 	case scanCmd:
@@ -225,7 +241,7 @@ func main() {
 	case hostsCreateCmd:
 		name, set := parseHostsCreate(args, hostsCreateCmd)
 		err := createHostSet(museAddr, name, set)
-		check("Could not list host sets:", err)
+		check("Could not create or update host set:", err)
 
 	case hostsDeleteCmd:
 		if len(args) != 1 {
@@ -234,6 +250,22 @@ func main() {
 		}
 		err := deleteHostSet(museAddr, args[0])
 		check("Could not delete host set:", err)
+
+	case hostsAddCmd:
+		if len(args) != 2 {
+			cmd.Usage()
+			return
+		}
+		err := addHost(museAddr, args[0], args[1])
+		check("Could not add host:", err)
+
+	case hostsRemoveCmd:
+		if len(args) != 2 {
+			cmd.Usage()
+			return
+		}
+		err := removeHost(museAddr, args[0], args[1])
+		check("Could not remove host:", err)
 
 	case infoCmd:
 		if len(args) != 1 {

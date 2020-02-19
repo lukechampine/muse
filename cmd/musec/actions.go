@@ -171,6 +171,56 @@ func deleteHostSet(museAddr string, setName string) error {
 	return nil
 }
 
+func addHost(museAddr string, setName string, host string) error {
+	c := muse.NewClient(museAddr)
+	hostKey, err := c.SHARD().LookupHost(host)
+	if err != nil {
+		return err
+	}
+	hosts, err := c.HostSet(setName)
+	if err != nil {
+		return err
+	}
+	for _, h := range hosts {
+		if h == hostKey {
+			fmt.Printf("Host %v is already in host set %q\n", hostKey.ShortKey(), setName)
+			return nil
+		}
+	}
+	hosts = append(hosts, hostKey)
+	err = c.SetHostSet(setName, hosts)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Added host %v to host set %q\n", hostKey.ShortKey(), setName)
+	return nil
+}
+
+func removeHost(museAddr string, setName string, host string) error {
+	c := muse.NewClient(museAddr)
+	hostKey, err := c.SHARD().LookupHost(host)
+	if err != nil {
+		return err
+	}
+	hosts, err := c.HostSet(setName)
+	if err != nil {
+		return err
+	}
+	for i, h := range hosts {
+		if h == hostKey {
+			hosts = append(hosts[:i], hosts[i+1:]...)
+			err = c.SetHostSet(setName, hosts)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Removed host %v from host set %q\n", hostKey.ShortKey(), setName)
+			return nil
+		}
+	}
+	fmt.Printf("Host %v is not in host set %q\n", hostKey.ShortKey(), setName)
+	return nil
+}
+
 func scan(museAddr, hostKeyPrefix string, bytes uint64, duration types.BlockHeight) error {
 	c := muse.NewClient(museAddr)
 	sc := c.SHARD()
