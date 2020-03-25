@@ -8,12 +8,11 @@ import (
 	"os"
 	"runtime"
 
-	"golang.org/x/crypto/ssh/terminal"
-	"lukechampine.com/us/renter/renterutil"
-	"lukechampine.com/us/wallet"
-
 	"gitlab.com/NebulousLabs/Sia/build"
+	"golang.org/x/crypto/ssh/terminal"
 	"lukechampine.com/muse"
+	"lukechampine.com/us/wallet"
+	"lukechampine.com/walrus"
 )
 
 var (
@@ -64,8 +63,8 @@ func main() {
 		log.Fatal("No shard address provided")
 	}
 
-	w := renterutil.NewWalrusClient(*walrusAddr, getSeed())
-	srv, err := muse.NewServer(*dir, w, w, *shardAddr)
+	w := walrus.NewClient(*walrusAddr)
+	srv, err := muse.NewServer(*dir, w.ProtoWallet(getSeed()), w.ProtoTransactionPool(), *shardAddr)
 	if err != nil {
 		log.Fatal("Could not initialize server:", err)
 	}
