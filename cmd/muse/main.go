@@ -73,30 +73,34 @@ func main() {
 
 	case haveWalrus:
 		log.Println("Using provided walrus server; no shard server provided")
-		log.Println("Running in full node mode...")
 		var err error
 		if *shardAddr, err = createShardServer(*dir); err != nil {
 			log.Fatal("Couldn't initialize full node:", err)
 		}
+		fmt.Println("Started shard server at", *shardAddr)
+		log.Println("Running in full node mode...")
 
 	case haveShard:
 		log.Println("Using provided shard server; no walrus server provided")
-		log.Println("Running in full node mode...")
 		var err error
 		if *walrusAddr, err = createWalletServer(*dir); err != nil {
 			log.Fatal("Couldn't initialize full node:", err)
 		}
+		fmt.Println("Started walrus server at", *walrusAddr)
+		log.Println("Running in full node mode...")
 
 	default:
 		log.Println("No walrus or shard server provided")
-		log.Println("Running in full node mode...")
 		var err error
 		if *walrusAddr, err = createWalletServer(*dir); err != nil {
 			log.Fatal("Couldn't initialize full node:", err)
 		}
+		fmt.Println("Started walrus server at", *walrusAddr)
 		if *shardAddr, err = createShardServer(*dir); err != nil {
 			log.Fatal("Couldn't initialize full node:", err)
 		}
+		fmt.Println("Started shard server at", *shardAddr)
+		log.Println("Running in full node mode...")
 	}
 
 	wc := walrus.NewClient(*walrusAddr)
