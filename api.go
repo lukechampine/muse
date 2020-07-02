@@ -2,11 +2,11 @@
 package muse // import "lukechampine.com/muse"
 
 import (
+	"crypto/ed25519"
 	"encoding/json"
 
 	"gitlab.com/NebulousLabs/Sia/modules"
 	"gitlab.com/NebulousLabs/Sia/types"
-	"lukechampine.com/us/ed25519"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renter"
 )

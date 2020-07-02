@@ -2,6 +2,7 @@ package muse
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +21,6 @@ import (
 	"gitlab.com/NebulousLabs/Sia/modules"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
-	"lukechampine.com/us/ed25519"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renter"
 	"lukechampine.com/us/renter/proto"
