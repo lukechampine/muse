@@ -3,6 +3,7 @@ title: muse API Reference
 
 language_tabs:
   - shell: curl
+  - go: Go
 
 search: true
 ---
@@ -29,6 +30,11 @@ protect your server if you plan to expose it over the Internet.
 curl "localhost:9580/contracts" 
 ```
 
+```go
+mc := muse.NewClient("localhost:9580")
+contracts, err := mc.AllContracts()
+```
+
 > Example Response:
 
 ```json
@@ -45,6 +51,11 @@ curl "localhost:9580/contracts"
 
 ```shell
 curl "localhost:9580/contracts?hostset=foo" 
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+contracts, err := mc.Contracts("foo")
 ```
 
 > Example Response:
@@ -104,6 +115,11 @@ curl "localhost:9580/form" \
       "uploadBandwidthPrice": "4429104182"
     }
   }'
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+contract, err := mc.FormContract(hostKey, funds, start, end, settings)
 ```
 
 > Example Response:
@@ -169,6 +185,11 @@ curl "localhost:9580/renew" \
   }'
 ```
 
+```go
+mc := muse.NewClient("localhost:9580")
+contract, err := mc.RenewContract(id, funds, start, end, settings)
+```
+
 > Example Response:
 
 ```json
@@ -213,6 +234,11 @@ curl "localhost:9580/scan" \
   -d '{
     "hostKey": "ed25519:8408ad8d5e7f605995bdf9ab13e5c0d84fbe1fc610c141e0578c7d26d5cfee75"
   }'
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+settings, err := mc.Scan(hostKey)
 ```
 
 > Example Response:
@@ -266,6 +292,11 @@ Requests that the server connect to a host and query its current settings.
 curl "localhost:9580/hostsets"
 ```
 
+```go
+mc := muse.NewClient("localhost:9580")
+hostSets, err := mc.HostSets()
+```
+
 > Example Response:
 
 ```json
@@ -293,6 +324,11 @@ None
 
 ```shell
 curl "localhost:9580/hostsets/foo"
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+hosts, err := mc.HostSet("foo")
 ```
 
 > Example Response:
@@ -332,6 +368,11 @@ curl "localhost:9580/hostsets/foo" \
     "ed25519:76ee361cce9d2586acd3bf510ff0903654b553c9b657b7da983b5b000b49b0d6",
     "ed25519:88aa3399790e216907fdf09ce38f592fbc2d99f6e1b56e1fdb056f27b6167693"
   ]'
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+err := mc.SetHostSet("foo", hosts)
 ```
 
 Creates, modifies, or deletes a host set. If the host set does not exist, it is
