@@ -69,7 +69,7 @@ func main() {
 
 	if *serveWalrus {
 		if err := createWalletServer(*walrusAddr, *dir); err != nil {
-			log.Fatal("Couldn't initialize walrus server:", err)
+			log.Fatalln("Couldn't initialize walrus server:", err)
 		}
 		log.Println("Started walrus server at", *walrusAddr)
 	} else {
@@ -80,7 +80,7 @@ func main() {
 	}
 	if *serveShard {
 		if err := createShardServer(*shardAddr, *dir); err != nil {
-			log.Fatal("Couldn't initialize shard server:", err)
+			log.Fatalln("Couldn't initialize shard server:", err)
 		}
 		log.Println("Started shard server at", *shardAddr)
 	} else {
@@ -93,7 +93,7 @@ func main() {
 	wc := walrus.NewClient(*walrusAddr)
 	srv, err := muse.NewServer(*dir, wc.ProtoWallet(getSeed()), wc.ProtoTransactionPool(), *shardAddr)
 	if err != nil {
-		log.Fatal("Could not initialize server:", err)
+		log.Fatalln("Could not initialize server:", err)
 	}
 
 	log.Printf("Listening on %v...", *apiAddr)
