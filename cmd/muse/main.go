@@ -51,8 +51,10 @@ func getSeed() wallet.Seed {
 func main() {
 	log.SetFlags(0)
 	apiAddr := flag.String("a", ":9580", "host:port that the API server listens on")
-	walrusAddr := flag.String("w", "", "host:port of the walrus server (optional)")
-	shardAddr := flag.String("s", "", "host:port of the shard server (optional)")
+	walrusAddr := flag.String("w", "localhost:9380", "host:port of the walrus server")
+	serveWalrus := flag.Bool("serve-walrus", false, "run a walrus server (on the addr given by -w)")
+	shardAddr := flag.String("s", "localhost:9580", "host:port of the shard server")
+	serveShard := flag.Bool("serve-shard", false, "run a shard server (on the addr given by -s)")
 	dir := flag.String("d", ".", "directory where server state is stored")
 	flag.Parse()
 
@@ -65,42 +67,27 @@ func main() {
 		return
 	}
 
-	// if server addrs provided, use them; otherwise, run full node
-	switch haveWalrus, haveShard := *walrusAddr != "", *shardAddr != ""; {
-	case haveWalrus, haveShard:
-		log.Println("Using provided walrus and shard servers")
-		log.Println("Running in lite client mode...")
-
-	case haveWalrus:
-		log.Println("Using provided walrus server; no shard server provided")
-		var err error
-		if *shardAddr, err = createShardServer(*dir); err != nil {
-			log.Fatal("Couldn't initialize full node:", err)
+	if *serveWalrus {
+		if err := createWalletServer(*walrusAddr, *dir); err != nil {
+			log.Fatal("Couldn't initialize walrus server:", err)
 		}
-		fmt.Println("Started shard server at", *shardAddr)
-		log.Println("Running in full node mode...")
-
-	case haveShard:
-		log.Println("Using provided shard server; no walrus server provided")
-		var err error
-		if *walrusAddr, err = createWalletServer(*dir); err != nil {
-			log.Fatal("Couldn't initialize full node:", err)
+		log.Println("Started walrus server at", *walrusAddr)
+	} else {
+		log.Println("Connecting to walrus server at", *walrusAddr)
+		if _, err := walrus.NewClient(*walrusAddr).Balance(false); err != nil {
+			log.Println("WARNING: walrus server not reachable")
 		}
-		fmt.Println("Started walrus server at", *walrusAddr)
-		log.Println("Running in full node mode...")
-
-	default:
-		log.Println("No walrus or shard server provided")
-		var err error
-		if *walrusAddr, err = createWalletServer(*dir); err != nil {
-			log.Fatal("Couldn't initialize full node:", err)
+	}
+	if *serveShard {
+		if err := createShardServer(*shardAddr, *dir); err != nil {
+			log.Fatal("Couldn't initialize shard server:", err)
 		}
-		fmt.Println("Started walrus server at", *walrusAddr)
-		if *shardAddr, err = createShardServer(*dir); err != nil {
-			log.Fatal("Couldn't initialize full node:", err)
+		log.Println("Started shard server at", *shardAddr)
+	} else {
+		log.Println("Connecting to shard server at", *shardAddr)
+		if _, err := shard.NewClient(*shardAddr).ChainHeight(); err != nil {
+			log.Println("WARNING: shard server not reachable")
 		}
-		fmt.Println("Started shard server at", *shardAddr)
-		log.Println("Running in full node mode...")
 	}
 
 	wc := walrus.NewClient(*walrusAddr)
@@ -120,11 +107,11 @@ var (
 	cs modules.ConsensusSet
 )
 
-func createShardServer(dir string) (addr string, err error) {
+func createShardServer(addr, dir string) (err error) {
 	if g == nil {
 		g, err = gateway.New(":9381", true, filepath.Join(dir, "gateway"))
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 	if cs == nil {
@@ -132,22 +119,28 @@ func createShardServer(dir string) (addr string, err error) {
 		cs, errChan = consensus.New(g, true, filepath.Join(dir, "consensus"))
 		err = handleAsyncErr(errChan)
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 	// muse expects a shard URL, not an interface, so start up a server and
 	// return the address it's listening on. This is kind of gross.
 	r, err := shard.NewRelay(cs, shard.NewJSONPersist(dir))
-	l, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return err
+	}
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
 	go http.Serve(l, shard.NewServer(r))
-	return "http://" + l.Addr().String(), nil
+	return nil
 }
 
-func createWalletServer(dir string) (addr string, err error) {
+func createWalletServer(addr, dir string) (err error) {
 	if g == nil {
 		g, err = gateway.New(":9381", true, filepath.Join(dir, "gateway"))
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 	if cs == nil {
@@ -155,24 +148,27 @@ func createWalletServer(dir string) (addr string, err error) {
 		cs, errChan = consensus.New(g, true, filepath.Join(dir, "consensus"))
 		err = handleAsyncErr(errChan)
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 	tp, err := transactionpool.New(cs, g, filepath.Join(dir, "tpool"))
 	if err != nil {
-		return "", err
+		return err
 	}
 	store, err := wallet.NewBoltDBStore(filepath.Join(dir, "wallet.db"), nil)
 	if err != nil {
-		return "", err
+		return err
 	}
 	w := wallet.New(store)
 	err = cs.ConsensusSetSubscribe(w.ConsensusSetSubscriber(store), store.ConsensusChangeID(), nil)
 
 	// same grossness as above
-	l, err := net.Listen("tcp", "localhost:0")
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
 	go http.Serve(l, walrus.NewServer(w, tp))
-	return "http://" + l.Addr().String(), nil
+	return nil
 }
 
 func handleAsyncErr(errCh <-chan error) error {
