@@ -53,7 +53,7 @@ func main() {
 	apiAddr := flag.String("a", ":9580", "host:port that the API server listens on")
 	walrusAddr := flag.String("w", "localhost:9380", "host:port of the walrus server")
 	serveWalrus := flag.Bool("serve-walrus", false, "run a walrus server (on the addr given by -w)")
-	shardAddr := flag.String("s", "localhost:9580", "host:port of the shard server")
+	shardAddr := flag.String("s", "localhost:9480", "host:port of the shard server")
 	serveShard := flag.Bool("serve-shard", false, "run a shard server (on the addr given by -s)")
 	dir := flag.String("d", ".", "directory where server state is stored")
 	flag.Parse()
@@ -72,6 +72,7 @@ func main() {
 			log.Fatalln("Couldn't initialize walrus server:", err)
 		}
 		log.Println("Started walrus server at", *walrusAddr)
+		*walrusAddr = "http://" + *walrusAddr
 	} else {
 		log.Println("Connecting to walrus server at", *walrusAddr)
 		if _, err := walrus.NewClient(*walrusAddr).Balance(false); err != nil {
@@ -83,6 +84,7 @@ func main() {
 			log.Fatalln("Couldn't initialize shard server:", err)
 		}
 		log.Println("Started shard server at", *shardAddr)
+		*shardAddr = "http://" + *shardAddr
 	} else {
 		log.Println("Connecting to shard server at", *shardAddr)
 		if _, err := shard.NewClient(*shardAddr).ChainHeight(); err != nil {
@@ -100,7 +102,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(*apiAddr, srv))
 }
 
-// global vars to make it easier to compose createShardServer and createWallet
+// global vars to make it easier to compose createShardServer and createWalletServer
 // (yeah yeah, sue me)
 var (
 	g  modules.Gateway
