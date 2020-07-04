@@ -371,9 +371,6 @@ func NewServer(dir string, wallet proto.Wallet, tpool proto.TransactionPool, sha
 	mux.HandleFunc("/scan", srv.handleScan)
 
 	// shard proxy
-	if !strings.HasPrefix(shardAddr, "https://") && !strings.HasPrefix(shardAddr, "http://") {
-		shardAddr = "https://" + shardAddr
-	}
 	shardURL, err := url.Parse(shardAddr)
 	if err != nil {
 		return nil, err
