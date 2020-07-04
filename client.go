@@ -128,21 +128,17 @@ func (c *Client) SetHostSet(name string, hosts []hostdb.HostPublicKey) (err erro
 
 // SHARD returns a client for the muse server's shard endpoints.
 func (c *Client) SHARD() *shard.Client {
-	addr := modifyURL(c.addr, func(u *url.URL) {
-		u.Path = path.Join(u.Path, "shard")
-	})
-	return shard.NewClient(addr)
+	u, err := url.Parse(c.addr)
+	if err != nil {
+		panic(err)
+	}
+	u.Path = path.Join(u.Path, "shard")
+	return shard.NewClient(u.String())
 }
 
 // NewClient returns a client that communicates with a muse server listening
 // on the specified address.
 func NewClient(addr string) *Client {
-	// use https by default
-	addr = modifyURL(addr, func(u *url.URL) {
-		if u.Scheme == "" {
-			u.Scheme = "https"
-		}
-	})
 	return &Client{addr}
 }
 
