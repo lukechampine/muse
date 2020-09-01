@@ -1,6 +1,7 @@
 package muse
 
 import (
+	"crypto/ed25519"
 	"encoding/json"
 	"io/ioutil"
 	"net"
@@ -11,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
-	"lukechampine.com/us/ed25519"
+	"lukechampine.com/us/ed25519hash"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renterhost"
 
@@ -175,7 +176,7 @@ type Host struct {
 }
 
 func (h *Host) PublicKey() hostdb.HostPublicKey {
-	return hostdb.HostKeyFromPublicKey(h.secretKey.PublicKey())
+	return hostdb.HostKeyFromPublicKey(ed25519hash.ExtractPublicKey(h.secretKey))
 }
 
 func (h *Host) settings() hostdb.HostSettings {
@@ -192,7 +193,7 @@ func (h *Host) announcement() []byte {
 		NetAddress: modules.NetAddress(h.listener.Addr().String()),
 		PublicKey:  h.PublicKey().SiaPublicKey(),
 	})
-	sig := h.secretKey.SignHash(crypto.HashBytes(ann))
+	sig := ed25519hash.Sign(h.secretKey, crypto.HashBytes(ann))
 	return append(ann, sig[:]...)
 }
 
@@ -291,7 +292,7 @@ func (h *Host) rpcFormContract(s *hostSession) error {
 		ParentID:       crypto.Hash(initRevision.ParentID),
 		CoveredFields:  types.CoveredFields{FileContractRevisions: []uint64{0}},
 		PublicKeyIndex: 1,
-		Signature:      h.secretKey.SignHash(renterhost.HashRevision(initRevision)),
+		Signature:      ed25519hash.Sign(h.secretKey, renterhost.HashRevision(initRevision)),
 	}
 	var renterSigs renterhost.RPCFormContractSignatures
 	s.sess.ReadResponse(&renterSigs, 4096)
@@ -345,7 +346,7 @@ func (h *Host) rpcRenewContract(s *hostSession) error {
 		ParentID:       crypto.Hash(initRevision.ParentID),
 		CoveredFields:  types.CoveredFields{FileContractRevisions: []uint64{0}},
 		PublicKeyIndex: 1,
-		Signature:      h.secretKey.SignHash(renterhost.HashRevision(initRevision)),
+		Signature:      ed25519hash.Sign(h.secretKey, renterhost.HashRevision(initRevision)),
 	}
 	var renterSigs renterhost.RPCFormContractSignatures
 	s.sess.ReadResponse(&renterSigs, 4096)

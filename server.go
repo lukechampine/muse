@@ -47,6 +47,7 @@ type server struct {
 	tpool  proto.TransactionPool
 	shard  *shard.Client
 	mu     sync.Mutex
+	utxoMu sync.Mutex // separate mutex for utxos, preventing reuse
 }
 
 func (s *server) saveContract(c Contract) error {
@@ -126,8 +127,10 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		PublicKey:    rf.HostKey,
 	}
 	key := ed25519.NewKeyFromSeed(frand.Bytes(32))
+	s.utxoMu.Lock()
 	rev, txnSet, err := proto.FormContract(s.wallet, s.tpool, key, host, rf.Funds, rf.StartHeight, rf.EndHeight)
 	if err != nil {
+		s.utxoMu.Unlock()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -141,6 +144,7 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 	// *shouldn't* reject the transaction, but it might if we desync from
 	// the network somehow.
 	submitErr := s.tpool.AcceptTransactionSet(txnSet)
+	s.utxoMu.Unlock()
 	if submitErr != nil && submitErr != modules.ErrDuplicateTransactionSet {
 		log.Println("WARN: contract transaction was not accepted", submitErr)
 	}
@@ -198,14 +202,17 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		PublicKey:    old.HostKey,
 		HostSettings: rf.Settings,
 	}
+	s.utxoMu.Lock()
 	rev, txnSet, err := proto.RenewContract(s.wallet, s.tpool, old.ID, old.RenterKey, host, rf.Funds, rf.StartHeight, rf.EndHeight)
 	if err != nil {
+		s.utxoMu.Unlock()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// submit txnSet to tpool (see handleForm)
 	submitErr := s.tpool.AcceptTransactionSet(txnSet)
+	s.utxoMu.Unlock()
 	if submitErr != nil && submitErr != modules.ErrDuplicateTransactionSet {
 		log.Println("WARN: contract transaction was not accepted", submitErr)
 	}
