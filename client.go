@@ -37,8 +37,8 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 	if err != nil {
 		return err
 	}
-	defer io.Copy(ioutil.Discard, r.Body)
 	defer r.Body.Close()
+	defer io.Copy(ioutil.Discard, r.Body)
 	if r.StatusCode != 200 {
 		err, _ := ioutil.ReadAll(r.Body)
 		return errors.New(strings.TrimSpace(string(err)))
