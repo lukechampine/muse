@@ -8,8 +8,8 @@ require (
 	gitlab.com/NebulousLabs/Sia v1.4.11
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	lukechampine.com/flagg v1.1.1
-	lukechampine.com/frand v1.2.0
+	lukechampine.com/frand v1.3.0
 	lukechampine.com/shard v0.3.3
-	lukechampine.com/us v0.17.1
+	lukechampine.com/us v0.17.2
 	lukechampine.com/walrus v0.8.4
 )

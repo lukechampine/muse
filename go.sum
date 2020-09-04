@@ -212,6 +212,8 @@ golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f h1:gWF768j/LaZugp8dyS4UwsslYCYz9XgFxvlgsn0n9H8=
 golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a h1:i47hUS795cOydZI4AwJQCKXOr4BvxzvikwDoDtHhP2Y=
+golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/time v0.0.0-20190308202827-9d24e82272b4/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
@@ -242,6 +244,8 @@ lukechampine.com/flagg v1.1.1/go.mod h1:a9ZuZu5LSPXELWSJrabRD00ort+lDXSOQu34xWgE
 lukechampine.com/frand v1.0.1/go.mod h1:4S/TM2ZgrKejMcKMbeLjISpJMO+/eZ1zu3vYX9dtj3s=
 lukechampine.com/frand v1.2.0 h1:YjUqUiPtAZxOtK8tru43XUw18JIoZszlupraMSk3aZc=
 lukechampine.com/frand v1.2.0/go.mod h1:4S/TM2ZgrKejMcKMbeLjISpJMO+/eZ1zu3vYX9dtj3s=
+lukechampine.com/frand v1.3.0 h1:HFLrwEHr78+EqAfyp8OChgEzdYCVZzzj6Y+cGDQRhaI=
+lukechampine.com/frand v1.3.0/go.mod h1:4S/TM2ZgrKejMcKMbeLjISpJMO+/eZ1zu3vYX9dtj3s=
 lukechampine.com/shard v0.3.3 h1:8XCMg376TGFp1J51TS0rvAToPZcEBQ95KIqCnMMM1Gc=
 lukechampine.com/shard v0.3.3/go.mod h1:cmCO7dNDatE3URu6nfYQPYTcqlvUXC7LxUpv+1TY/zI=
 lukechampine.com/us v0.16.0 h1:sKLB9m17m1u/UAzi8h6oPBCowwafZye8iECIvBZATWI=
@@ -250,6 +254,8 @@ lukechampine.com/us v0.16.2 h1:OBO+SE9IB5pgj8CYHIBIyN/t42JpvmK7Yrkb4OZyj5I=
 lukechampine.com/us v0.16.2/go.mod h1:sAjYHlxUrH7HIZ9gFrJpO4Y4AmlQENWyteJWNnotEl4=
 lukechampine.com/us v0.17.1 h1:/iDXcAlE9Qn2Bq01aj67iGLDl8EorfLSVl9fsqTuuGg=
 lukechampine.com/us v0.17.1/go.mod h1:sAjYHlxUrH7HIZ9gFrJpO4Y4AmlQENWyteJWNnotEl4=
+lukechampine.com/us v0.17.2 h1:LQG0o5o0Te+4XLlACiqd0UPgXArnSWGclpmwS94cpjg=
+lukechampine.com/us v0.17.2/go.mod h1:59kL+Pb5IDiyomY5GLJ9nwGS7gjVtVYuwJj4OS8bbvs=
 lukechampine.com/walrus v0.8.2 h1:scwNV4s0d55ohAUcZHwNxukZtmLysU/NPCms3/nvLF4=
 lukechampine.com/walrus v0.8.2/go.mod h1:g361h8O+F+WJStp1noNujzxU3I9kZBk6y3/YuBCxmbs=
 lukechampine.com/walrus v0.8.3 h1:BDi5MjuEWZJ6XQWmGouHL+OthqfRTiz/xvuuWnR2cXk=

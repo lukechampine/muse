@@ -239,10 +239,10 @@ func (h *Host) handleConn(conn net.Conn) error {
 	}
 	s := &hostSession{sess: hs}
 	rpcs := map[renterhost.Specifier]func(*hostSession) error{
-		renterhost.RPCSettingsID:      h.rpcSettings,
-		renterhost.RPCFormContractID:  h.rpcFormContract,
-		renterhost.RPCLockID:          h.rpcLock,
-		renterhost.RPCRenewContractID: h.rpcRenewContract,
+		renterhost.RPCSettingsID:           h.rpcSettings,
+		renterhost.RPCFormContractID:       h.rpcFormContract,
+		renterhost.RPCLockID:               h.rpcLock,
+		renterhost.RPCRenewClearContractID: h.rpcRenewContract,
 	}
 	for {
 		id, err := s.sess.ReadID()
@@ -321,7 +321,7 @@ func (h *Host) rpcLock(s *hostSession) error {
 }
 
 func (h *Host) rpcRenewContract(s *hostSession) error {
-	var req renterhost.RPCFormContractRequest
+	var req renterhost.RPCRenewAndClearContractRequest
 	s.sess.ReadRequest(&req, 4096)
 	txn := req.Transactions[len(req.Transactions)-1]
 	fc := txn.FileContracts[0]
@@ -348,13 +348,13 @@ func (h *Host) rpcRenewContract(s *hostSession) error {
 		PublicKeyIndex: 1,
 		Signature:      ed25519hash.Sign(h.secretKey, renterhost.HashRevision(initRevision)),
 	}
-	var renterSigs renterhost.RPCFormContractSignatures
+	var renterSigs renterhost.RPCRenewAndClearContractSignatures
 	s.sess.ReadResponse(&renterSigs, 4096)
 	h.contracts[initRevision.ParentID] = &hostContract{
 		rev:  initRevision,
 		sigs: [2]types.TransactionSignature{renterSigs.RevisionSignature, hostRevisionSig},
 	}
-	hostSigs := &renterhost.RPCFormContractSignatures{
+	hostSigs := &renterhost.RPCRenewAndClearContractSignatures{
 		RevisionSignature: hostRevisionSig,
 	}
 	return s.sess.WriteResponse(hostSigs, nil)
