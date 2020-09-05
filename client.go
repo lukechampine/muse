@@ -17,6 +17,21 @@ import (
 	"lukechampine.com/us/hostdb"
 )
 
+// Error is an error wrapper that provides Is function.
+type Error struct {
+	error
+}
+
+// NewError returns an error that formats as the given text.
+func NewError(str string) Error {
+	return Error{error: errors.New(str)}
+}
+
+// Is reports whether this error matches target.
+func (e Error) Is(err error) bool {
+	return strings.Contains(e.Error(), err.Error())
+}
+
 // A Client communicates with a muse server.
 type Client struct {
 	addr string
@@ -41,7 +56,7 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 	defer io.Copy(ioutil.Discard, r.Body)
 	if r.StatusCode != 200 {
 		err, _ := ioutil.ReadAll(r.Body)
-		return errors.New(strings.TrimSpace(string(err)))
+		return NewError(strings.TrimSpace(string(err)))
 	}
 	if resp == nil {
 		return nil
