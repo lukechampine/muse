@@ -2,6 +2,7 @@ package muse
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,13 +23,13 @@ type Client struct {
 	addr string
 }
 
-func (c *Client) req(method string, route string, data, resp interface{}) error {
+func (c *Client) req(ctx context.Context, method string, route string, data, resp interface{}) error {
 	var body io.Reader
 	if data != nil {
 		js, _ := json.Marshal(data)
 		body = bytes.NewReader(js)
 	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%v%v", c.addr, route), body)
+	req, err := http.NewRequestWithContext(ctx, method, fmt.Sprintf("%v%v", c.addr, route), body)
 	if err != nil {
 		panic(err)
 	}
@@ -49,30 +50,36 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 	return json.NewDecoder(r.Body).Decode(resp)
 }
 
-func (c *Client) get(route string, r interface{}) error     { return c.req("GET", route, nil, r) }
-func (c *Client) post(route string, d, r interface{}) error { return c.req("POST", route, d, r) }
-func (c *Client) put(route string, d, r interface{}) error  { return c.req("PUT", route, d, r) }
+func (c *Client) get(ctx context.Context, route string, r interface{}) error {
+	return c.req(ctx, "GET", route, nil, r)
+}
+func (c *Client) post(ctx context.Context, route string, d, r interface{}) error {
+	return c.req(ctx, "POST", route, d, r)
+}
+func (c *Client) put(ctx context.Context, route string, d, r interface{}) error {
+	return c.req(ctx, "PUT", route, d, r)
+}
 
 // AllContracts returns all contracts formed by the server.
-func (c *Client) AllContracts() (cs []Contract, err error) {
-	err = c.get("/contracts", &cs)
+func (c *Client) AllContracts(ctx context.Context) (cs []Contract, err error) {
+	err = c.get(ctx,"/contracts", &cs)
 	return
 }
 
 // Contracts returns the contracts in the specified set.
-func (c *Client) Contracts(set string) (cs []Contract, err error) {
+func (c *Client) Contracts(ctx context.Context, set string) (cs []Contract, err error) {
 	if set == "" {
 		return nil, errors.New("no host set provided; to retrieve all contracts, use AllContracts")
 	}
-	err = c.get("/contracts?hostset="+set, &cs)
+	err = c.get(ctx,"/contracts?hostset="+set, &cs)
 	return
 }
 
 // Scan queries the specified host for its current settings.
 //
 // Note that the host may also be scanned via the hostdb.Scan function.
-func (c *Client) Scan(host hostdb.HostPublicKey) (settings hostdb.HostSettings, err error) {
-	err = c.post("/scan", RequestScan{
+func (c *Client) Scan(ctx context.Context, host hostdb.HostPublicKey) (settings hostdb.HostSettings, err error) {
+	err = c.post(ctx,"/scan", RequestScan{
 		HostKey: host,
 	}, &settings)
 	return
@@ -81,8 +88,8 @@ func (c *Client) Scan(host hostdb.HostPublicKey) (settings hostdb.HostSettings, 
 // Form forms a contract with a host. The settings should be obtained from a
 // recent call to Scan. If the settings have changed in the interim, the host
 // may reject the contract.
-func (c *Client) Form(host hostdb.HostPublicKey, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
-	err = c.post("/form", RequestForm{
+func (c *Client) Form(ctx context.Context, host hostdb.HostPublicKey, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
+	err = c.post(ctx,"/form", RequestForm{
 		HostKey:     host,
 		Funds:       funds,
 		StartHeight: start,
@@ -96,8 +103,8 @@ func (c *Client) Form(host hostdb.HostPublicKey, funds types.Currency, start, en
 // contract previously formed by the server. The settings should be obtained
 // from a recent call to Scan. If the settings have changed in the interim, the
 // host may reject the contract.
-func (c *Client) Renew(id types.FileContractID, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
-	err = c.post("/renew", RequestRenew{
+func (c *Client) Renew(ctx context.Context, id types.FileContractID, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
+	err = c.post(ctx,"/renew", RequestRenew{
 		ID:          id,
 		Funds:       funds,
 		StartHeight: start,
@@ -108,21 +115,21 @@ func (c *Client) Renew(id types.FileContractID, funds types.Currency, start, end
 }
 
 // HostSets returns the current list of host sets.
-func (c *Client) HostSets() (hs []string, err error) {
-	err = c.get("/hostsets/", &hs)
+func (c *Client) HostSets(ctx context.Context) (hs []string, err error) {
+	err = c.get(ctx,"/hostsets/", &hs)
 	return
 }
 
 // HostSet returns the contents of the named host set.
-func (c *Client) HostSet(name string) (hosts []hostdb.HostPublicKey, err error) {
-	err = c.get("/hostsets/"+name, &hosts)
+func (c *Client) HostSet(ctx context.Context, name string) (hosts []hostdb.HostPublicKey, err error) {
+	err = c.get(ctx,"/hostsets/"+name, &hosts)
 	return
 }
 
 // SetHostSet sets the contents of a host set, creating it if it does not exist.
 // If an empty slice is passed, the host set is deleted.
-func (c *Client) SetHostSet(name string, hosts []hostdb.HostPublicKey) (err error) {
-	err = c.put("/hostsets/"+name, hosts, nil)
+func (c *Client) SetHostSet(ctx context.Context, name string, hosts []hostdb.HostPublicKey) (err error) {
+	err = c.put(ctx,"/hostsets/"+name, hosts, nil)
 	return
 }
 
