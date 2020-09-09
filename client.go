@@ -2,6 +2,7 @@ package muse
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 // A Client communicates with a muse server.
 type Client struct {
 	addr string
+	ctx  context.Context
 }
 
 func (c *Client) req(method string, route string, data, resp interface{}) error {
@@ -28,7 +30,7 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 		js, _ := json.Marshal(data)
 		body = bytes.NewReader(js)
 	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%v%v", c.addr, route), body)
+	req, err := http.NewRequestWithContext(c.ctx, method, fmt.Sprintf("%v%v", c.addr, route), body)
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +54,15 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 func (c *Client) get(route string, r interface{}) error     { return c.req("GET", route, nil, r) }
 func (c *Client) post(route string, d, r interface{}) error { return c.req("POST", route, d, r) }
 func (c *Client) put(route string, d, r interface{}) error  { return c.req("PUT", route, d, r) }
+
+// WithContext returns a new Client whose requests are subject to the supplied
+// context.
+func (c *Client) WithContext(ctx context.Context) *Client {
+	return &Client{
+		addr: c.addr,
+		ctx:  ctx,
+	}
+}
 
 // AllContracts returns all contracts formed by the server.
 func (c *Client) AllContracts() (cs []Contract, err error) {
@@ -139,7 +150,7 @@ func (c *Client) SHARD() *shard.Client {
 // NewClient returns a client that communicates with a muse server listening
 // on the specified address.
 func NewClient(addr string) *Client {
-	return &Client{addr}
+	return &Client{addr, context.Background()}
 }
 
 func modifyURL(str string, fn func(*url.URL)) string {

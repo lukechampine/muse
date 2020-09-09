@@ -1,6 +1,7 @@
 package muse
 
 import (
+	"context"
 	"crypto/ed25519"
 	"encoding/json"
 	"io/ioutil"
@@ -156,6 +157,16 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	} else if len(contracts) != 1 || contracts[0].ID != newContract.ID {
 		t.Fatal("wrong contracts:", contracts)
+	}
+
+	// test context cancellation
+	ctx, cancel := context.WithCancel(context.Background())
+	if _, err := c.WithContext(ctx).AllContracts(); err != nil {
+		t.Fatal("should not fail with uncancelled context:", err)
+	}
+	cancel()
+	if _, err := c.WithContext(ctx).AllContracts(); err == nil {
+		t.Fatal("should fail with cancelled context")
 	}
 }
 
