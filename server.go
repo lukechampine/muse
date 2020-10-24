@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"gitlab.com/NebulousLabs/Sia/modules"
+	"gitlab.com/NebulousLabs/Sia/types"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/hostdb"
@@ -54,6 +55,11 @@ func (s *server) saveContract(c Contract) error {
 	path := filepath.Join(s.dir, fmt.Sprintf("%s-%x.contract", c.HostKey.ShortKey(), c.ID[:4]))
 	js, _ := json.MarshalIndent(c, "", "  ")
 	return ioutil.WriteFile(path, js, 0660)
+}
+
+func (s *server) deleteContract(c Contract) error {
+	path := filepath.Join(s.dir, fmt.Sprintf("%s-%x.contract", c.HostKey.ShortKey(), c.ID[:4]))
+	return os.RemoveAll(path)
 }
 
 func (s *server) handleContracts(w http.ResponseWriter, req *http.Request) {
@@ -328,6 +334,40 @@ func (s *server) handleScan(w http.ResponseWriter, req *http.Request) {
 	writeJSON(w, host.HostSettings)
 }
 
+func (s *server) handleDelete(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+	idStr := strings.TrimPrefix(req.URL.Path, "/delete/")
+	if strings.Contains(idStr, "/") {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	var id types.FileContractID
+	if err := id.LoadString(idStr); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var c Contract
+	s.mu.Lock()
+	for i := range s.contracts {
+		if s.contracts[i].ID == id {
+			s.contracts = append(s.contracts[:i], s.contracts[i+1:]...)
+			c = s.contracts[i]
+			break
+		}
+	}
+	s.mu.Unlock()
+	if c.ID == (types.FileContractID{}) {
+		return // contract not found
+	}
+	if err := s.deleteContract(c); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // NewServer returns an HTTP handler that serves the muse API.
 func NewServer(dir string, wallet proto.Wallet, tpool proto.TransactionPool, shardAddr string) (http.Handler, error) {
 	srv := &server{
@@ -374,6 +414,7 @@ func NewServer(dir string, wallet proto.Wallet, tpool proto.TransactionPool, sha
 	mux.HandleFunc("/contracts", srv.handleContracts)
 	mux.HandleFunc("/form", srv.handleForm)
 	mux.HandleFunc("/renew", srv.handleRenew)
+	mux.HandleFunc("/delete/", srv.handleDelete)
 	mux.HandleFunc("/hostsets/", srv.handleHostSets)
 	mux.HandleFunc("/scan", srv.handleScan)
 

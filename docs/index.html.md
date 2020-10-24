@@ -119,7 +119,7 @@ curl "localhost:9580/form" \
 
 ```go
 mc := muse.NewClient("localhost:9580")
-contract, err := mc.FormContract(hostKey, funds, start, end, settings)
+contract, err := mc.Form(hostKey, funds, start, end, settings)
 ```
 
 > Example Response:
@@ -187,7 +187,7 @@ curl "localhost:9580/renew" \
 
 ```go
 mc := muse.NewClient("localhost:9580")
-contract, err := mc.RenewContract(id, funds, start, end, settings)
+contract, err := mc.Renew(id, funds, start, end, settings)
 ```
 
 > Example Response:
@@ -222,6 +222,44 @@ request. For convenience, however, you can pass the entire object.
 -------|------------
   400  | Invalid request object, or unknown ID
   500  | Host unavailable, or host rejected contract
+
+
+## Delete a Contract
+
+> Example Request:
+
+```shell
+curl "localhost:9580/delete/f506d7f1c03f40554a6b15da48684b96a3661be1b5c5380cd46d8a9efee8b6ff" \
+  -X POST
+```
+
+```go
+mc := muse.NewClient("localhost:9580")
+err := mc.Delete(id)
+```
+
+Deletes a contract from the server. The ID must refer to a contract previously
+formed by the server. The contract itself is not revised or otherwise affected
+in any way. In general, contracts should only be deleted once they have expired
+and are no longer needed.
+
+<aside class="notice">
+It is rarely necessary to delete a contract, since host sets can be used to
+filter out contracts that you do not wish to use. However, deletion can be useful
+if you have multiple contracts with the same host, or if your contract metadata
+files are consuming too much disk space.
+</aside>
+
+### HTTP Request
+
+`POST http://localhost:9580/delete/<id>`
+
+### Errors
+
+  Code | Description
+-------|------------
+  400  | Invalid contract ID
+  500  | Contract file could not be removed
 
 
 ## Scan a Host

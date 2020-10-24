@@ -159,6 +159,15 @@ func TestServer(t *testing.T) {
 		t.Fatal("wrong contracts:", contracts)
 	}
 
+	// test deletion
+	if err := c.Delete(contract.ID); err != nil {
+		t.Fatal(err)
+	} else if contracts, err := c.AllContracts(); err != nil {
+		t.Fatal(err)
+	} else if len(contracts) != 1 || contracts[0].ID != newContract.ID {
+		t.Fatal("wrong contracts:", contracts)
+	}
+
 	// test context cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	if _, err := c.WithContext(ctx).AllContracts(); err != nil {
