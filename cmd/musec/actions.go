@@ -264,7 +264,7 @@ func scan(museAddr, hostKeyPrefix string, bytes uint64, duration types.BlockHeig
 		}
 		str := strings.Repeat("█", int(pct/8))
 		if pct%8 != 0 {
-			str += string('█' + (8 - pct%8))
+			str += string(rune('█' + (8 - pct%8)))
 		}
 		return str
 	}
