@@ -353,8 +353,8 @@ func (s *server) handleDelete(w http.ResponseWriter, req *http.Request) {
 	s.mu.Lock()
 	for i := range s.contracts {
 		if s.contracts[i].ID == id {
-			s.contracts = append(s.contracts[:i], s.contracts[i+1:]...)
 			c = s.contracts[i]
+			s.contracts = append(s.contracts[:i], s.contracts[i+1:]...)
 			break
 		}
 	}
