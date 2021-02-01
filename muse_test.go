@@ -11,16 +11,15 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	"gitlab.com/NebulousLabs/Sia/crypto"
+	"gitlab.com/NebulousLabs/Sia/modules"
+	"gitlab.com/NebulousLabs/Sia/types"
+	"gitlab.com/NebulousLabs/encoding"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/ed25519hash"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renterhost"
-
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/encoding"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
 )
 
 type mockCS struct{}
