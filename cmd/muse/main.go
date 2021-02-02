@@ -15,7 +15,7 @@ import (
 	"gitlab.com/NebulousLabs/Sia/modules/consensus"
 	"gitlab.com/NebulousLabs/Sia/modules/gateway"
 	"gitlab.com/NebulousLabs/Sia/modules/transactionpool"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"lukechampine.com/muse"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/wallet"
@@ -34,7 +34,7 @@ func getSeed() wallet.Seed {
 		fmt.Println("Using WALRUS_SEED environment variable")
 	} else {
 		fmt.Print("Seed: ")
-		pw, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		pw, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			log.Fatal("Could not read seed phrase:", err)
 		}
