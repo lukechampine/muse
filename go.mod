@@ -13,5 +13,5 @@ require (
 	lukechampine.com/frand v1.3.0
 	lukechampine.com/shard v0.3.5
 	lukechampine.com/us v0.19.1
-	lukechampine.com/walrus v0.10.3
+	lukechampine.com/walrus v0.10.4
 )
