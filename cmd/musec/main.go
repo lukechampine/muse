@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"gitlab.com/NebulousLabs/Sia/build"
+	"go.sia.tech/siad/build"
 	"lukechampine.com/flagg"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renter"

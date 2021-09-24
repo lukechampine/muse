@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/NebulousLabs/Sia/types"
+	"go.sia.tech/siad/types"
 )
 
 // form [hostkey] [funds] [endheight/duration]
