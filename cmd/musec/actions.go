@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gitlab.com/NebulousLabs/Sia/types"
+	"go.sia.tech/siad/types"
 	"lukechampine.com/frand"
 	"lukechampine.com/muse"
 	"lukechampine.com/us/hostdb"

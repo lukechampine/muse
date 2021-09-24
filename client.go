@@ -13,7 +13,7 @@ import (
 	"path"
 	"strings"
 
-	"gitlab.com/NebulousLabs/Sia/types"
+	"go.sia.tech/siad/types"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/hostdb"
 )
